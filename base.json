@@ -1,0 +1,94 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "type": "string"
+        },
+        "windowsUserName": {
+            "type": "string"
+        },
+        "windowsPassword": {
+            "type": "securestring"
+        },
+        "labName": {
+            "type": "string"
+        },
+        "osVersionAndEdition": {
+            "type": "string"
+        },
+        "vmSize": {
+            "type": "string"
+        },
+        "vNetName": {
+            "type": "string"
+        }
+    },
+
+    "functions": [
+        {
+            "namespace": "LabHelper",
+            "members": {
+                "getSubnetName": {
+                    "parameters": [
+                        {
+                            "name": "paramLabName",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[if(equals(parameters('paramLabName'), 'Servers-lab'), 'Servers', 'User-Machines')]"
+                    }
+                },
+
+                "getNetworkId": {
+                    "parameters": [
+                        {
+                            "name": "paramLabName",
+                            "type": "string"
+                        },
+                        {
+                            "name": "vnetName",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('ParamLabName'), parameters('vnetName'))]"
+                    }
+                }
+            }
+        }
+    ],
+
+    "resources": [
+        {
+            "type": "Microsoft.DevTestLab/labs/virtualmachines",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('labName'), '/', parameters('vmName'))]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "userName": "[parameters('windowsUsername')]",
+                "password": "[parameters('windowsPassword')]",
+
+                "allowClaim": false,
+                "isAuthenticationWithSshKey": false,
+
+                "labSubnetName": "[LabHelper.getSubnetName(parameters('labName'))]",
+                "labVirtualNetworkId": "[LabHelper.getNetworkId(parameters('labName'), parameters('vNetName'))]",
+                "disallowPublicIpAddress": true,
+
+                "size": "[parameters('vmSize')]",
+
+                "galleryImageReference": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "osType": "Windows",
+                    "offer": "WindowsServer",
+                    "version": "latest",
+                    "sku": "[parameters('osVersionAndEdition')]"
+                }
+            }
+        }
+    ]
+}
