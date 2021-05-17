@@ -1,0 +1,74 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "functions": [
+        
+    ],
+
+    "parameters": {
+        "vmName": {
+            "type": "string"
+        },
+        "windowsUserName": {
+            "type": "string"
+        },
+        "windowsPassword": {
+            "type": "string"
+        },
+        "labName": {
+            "type": "string"
+        },
+        "vNetName": {
+            "type": "string"
+        },
+        "resourceGroupName": {
+            "type": "string"
+        }
+    },
+
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "DTLMachineDeployment",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "properties": {
+
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/mm-ops/arm-poc/main/base.json",
+                },
+                "parameters": {
+
+                    "vmName": {
+                        "value": "[parameters('vmName')]"
+                    },
+
+                    "windowsUserName": {
+                        "value": "[parameters('windowsUserName')]"
+                    },
+
+                    "windowsPassword": {
+                        "value": "[parameters('windowsPassword')]"
+                    },
+
+                    "labName": {
+                        "value": "[parameters('labName')]"
+                    },
+
+                    "vNetName": {
+                        "value": "[parameters('vNetName')]"
+                    },
+
+                    "osVersionAndEdition": {
+                        "value": "2019-Datacenter"
+                    },
+
+                    "vmSize": {
+                        "value": "Standard_A4_v2"
+                    }
+                }
+            }
+        }
+    ]
+}
